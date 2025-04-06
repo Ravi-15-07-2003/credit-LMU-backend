@@ -6,7 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authorize = exports.protect = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = __importDefault(require("../models/User"));
-const protect = async (req, res, next) => {
+const asyncHandler_1 = __importDefault(require("../utils/asyncHandler"));
+exports.protect = (0, asyncHandler_1.default)(async (req, res, next) => {
     let token;
     if (req.headers.authorization &&
         req.headers.authorization.startsWith("Bearer")) {
@@ -21,20 +22,19 @@ const protect = async (req, res, next) => {
             next();
         }
         catch (error) {
-            return res.status(401).json({ message: "Not authorized, token failed" });
+            return res
+                .status(401)
+                .json({ message: "Not authorized, token failed" });
         }
     }
     else {
         return res.status(401).json({ message: "Not authorized, no token" });
     }
-};
-exports.protect = protect;
-const authorize = (roles) => {
-    return (req, res, next) => {
-        if (!req.user || !roles.includes(req.user.role)) {
-            return res.status(403).json({ message: "Forbidden: Access is denied" });
-        }
-        next();
-    };
-};
+});
+const authorize = (roles) => (0, asyncHandler_1.default)(async (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+        return res.status(403).json({ message: "Forbidden: Access is denied" });
+    }
+    next();
+});
 exports.authorize = authorize;
